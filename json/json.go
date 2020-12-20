@@ -68,11 +68,11 @@ func (c *jsonCodec) Unmarshal(b []byte, v interface{}) error {
 	return err
 }
 
-func (c *jsonCodec) ReadHeader(conn io.ReadWriter, m *codec.Message, t codec.MessageType) error {
+func (c *jsonCodec) ReadHeader(conn io.Reader, m *codec.Message, t codec.MessageType) error {
 	return nil
 }
 
-func (c *jsonCodec) ReadBody(conn io.ReadWriter, b interface{}) error {
+func (c *jsonCodec) ReadBody(conn io.Reader, b interface{}) error {
 	switch m := b.(type) {
 	case nil:
 		return nil
@@ -88,7 +88,7 @@ func (c *jsonCodec) ReadBody(conn io.ReadWriter, b interface{}) error {
 	return json.NewDecoder(conn).Decode(b)
 }
 
-func (c *jsonCodec) Write(conn io.ReadWriter, m *codec.Message, b interface{}) error {
+func (c *jsonCodec) Write(conn io.Writer, m *codec.Message, b interface{}) error {
 	switch m := b.(type) {
 	case nil:
 		return nil
