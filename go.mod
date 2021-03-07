@@ -7,7 +7,6 @@ go 1.14
 require (
 	github.com/golang/protobuf v1.4.3
 	github.com/segmentio/encoding v0.2.7
-	github.com/unistack-org/micro-proto v0.0.2-0.20210307161332-120b8d428313
 	github.com/unistack-org/micro/v3 v3.2.20
 	google.golang.org/protobuf v1.25.0
 )
