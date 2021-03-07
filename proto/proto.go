@@ -8,6 +8,7 @@ import (
 	// nolint: staticcheck
 	oldproto "github.com/golang/protobuf/proto"
 	"github.com/segmentio/encoding/proto"
+	mproto "github.com/unistack-org/micro-proto/proto"
 	"github.com/unistack-org/micro/v3/codec"
 	newproto "google.golang.org/protobuf/proto"
 )
@@ -20,6 +21,8 @@ func (c *protoCodec) Marshal(v interface{}) ([]byte, error) {
 		return nil, nil
 	case *codec.Frame:
 		return m.Data, nil
+	case *mproto.Frame:
+		return m.Data, nil
 	case newproto.Message, oldproto.Message, proto.Message:
 		return proto.Marshal(m)
 	}
@@ -27,6 +30,7 @@ func (c *protoCodec) Marshal(v interface{}) ([]byte, error) {
 }
 
 func (c *protoCodec) Unmarshal(d []byte, v interface{}) error {
+	var err error
 	if d == nil {
 		return nil
 	}
@@ -35,10 +39,14 @@ func (c *protoCodec) Unmarshal(d []byte, v interface{}) error {
 		return nil
 	case *codec.Frame:
 		m.Data = d
+	case *mproto.Frame:
+		m.Data = d
 	case newproto.Message, oldproto.Message, proto.Message:
-		return proto.Unmarshal(d, m)
+		err = proto.Unmarshal(d, m)
+	default:
+		err = codec.ErrInvalidMessage
 	}
-	return codec.ErrInvalidMessage
+	return err
 }
 
 func (c *protoCodec) ReadHeader(conn io.Reader, m *codec.Message, t codec.MessageType) error {
@@ -48,6 +56,13 @@ func (c *protoCodec) ReadHeader(conn io.Reader, m *codec.Message, t codec.Messag
 func (c *protoCodec) ReadBody(conn io.Reader, b interface{}) error {
 	switch m := b.(type) {
 	case nil:
+		return nil
+	case *mproto.Frame:
+		buf, err := ioutil.ReadAll(conn)
+		if err != nil {
+			return err
+		}
+		m.Data = buf
 		return nil
 	case *codec.Frame:
 		buf, err := ioutil.ReadAll(conn)
@@ -70,6 +85,9 @@ func (c *protoCodec) Write(conn io.Writer, m *codec.Message, b interface{}) erro
 	switch m := b.(type) {
 	case nil:
 		return nil
+	case *mproto.Frame:
+		_, err := conn.Write(m.Data)
+		return err
 	case *codec.Frame:
 		_, err := conn.Write(m.Data)
 		return err
