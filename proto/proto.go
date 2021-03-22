@@ -5,8 +5,6 @@ import (
 	"io"
 	"io/ioutil"
 
-	// nolint: staticcheck
-	oldproto "github.com/golang/protobuf/proto"
 	"github.com/segmentio/encoding/proto"
 	"github.com/unistack-org/micro/v3/codec"
 	newproto "google.golang.org/protobuf/proto"
@@ -20,7 +18,7 @@ func (c *protoCodec) Marshal(v interface{}) ([]byte, error) {
 		return nil, nil
 	case *codec.Frame:
 		return m.Data, nil
-	case newproto.Message, oldproto.Message, proto.Message:
+	case newproto.Message, proto.Message:
 		return proto.Marshal(m)
 	}
 	return nil, codec.ErrInvalidMessage
@@ -36,7 +34,7 @@ func (c *protoCodec) Unmarshal(d []byte, v interface{}) error {
 		return nil
 	case *codec.Frame:
 		m.Data = d
-	case newproto.Message, oldproto.Message, proto.Message:
+	case newproto.Message, proto.Message:
 		err = proto.Unmarshal(d, m)
 	default:
 		err = codec.ErrInvalidMessage
@@ -59,7 +57,7 @@ func (c *protoCodec) ReadBody(conn io.Reader, b interface{}) error {
 		}
 		m.Data = buf
 		return nil
-	case oldproto.Message, newproto.Message, proto.Message:
+	case newproto.Message, proto.Message:
 		buf, err := ioutil.ReadAll(conn)
 		if err != nil {
 			return err
@@ -76,7 +74,7 @@ func (c *protoCodec) Write(conn io.Writer, m *codec.Message, b interface{}) erro
 	case *codec.Frame:
 		_, err := conn.Write(m.Data)
 		return err
-	case oldproto.Message, newproto.Message, proto.Message:
+	case newproto.Message, proto.Message:
 		buf, err := proto.Marshal(m)
 		if err != nil {
 			return err
