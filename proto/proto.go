@@ -54,6 +54,8 @@ func (c *protoCodec) ReadBody(conn io.Reader, b interface{}) error {
 		buf, err := ioutil.ReadAll(conn)
 		if err != nil {
 			return err
+		} else if len(buf) == 0 {
+			return nil
 		}
 		m.Data = buf
 		return nil
@@ -61,7 +63,7 @@ func (c *protoCodec) ReadBody(conn io.Reader, b interface{}) error {
 		buf, err := ioutil.ReadAll(conn)
 		if err != nil {
 			return err
-		} else if buf == nil {
+		} else if len(buf) == 0 {
 			return nil
 		}
 		return proto.Unmarshal(buf, m)
