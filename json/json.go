@@ -3,10 +3,10 @@ package json
 
 import (
 	"io"
-	"io/ioutil"
 
 	"github.com/segmentio/encoding/json"
 	"github.com/unistack-org/micro/v3/codec"
+	rutil "github.com/unistack-org/micro/v3/util/reflect"
 )
 
 var (
@@ -15,6 +15,10 @@ var (
 	JsonUnmarshaler = &Unmarshaler{
 		ZeroCopy: true,
 	}
+)
+
+const (
+	flattenTag = "flatten"
 )
 
 type Marshaler struct {
@@ -38,17 +42,21 @@ type jsonCodec struct {
 	decodeFlags json.ParseFlags
 }
 
-func (c *jsonCodec) Marshal(b interface{}) ([]byte, error) {
-	switch m := b.(type) {
+func (c *jsonCodec) Marshal(v interface{}) ([]byte, error) {
+	switch m := v.(type) {
 	case nil:
 		return nil, nil
 	case *codec.Frame:
 		return m.Data, nil
 	}
 
+	if nv, nerr := rutil.StructFieldByTag(v, codec.DefaultTagName, flattenTag); nerr == nil {
+		v = nv
+	}
+
 	var err error
 	var buf []byte
-	buf, err = json.Append(buf, b, c.encodeFlags)
+	buf, err = json.Append(buf, v, c.encodeFlags)
 	return buf, err
 }
 
@@ -64,6 +72,9 @@ func (c *jsonCodec) Unmarshal(b []byte, v interface{}) error {
 		return nil
 	}
 
+	if nv, nerr := rutil.StructFieldByTag(v, codec.DefaultTagName, flattenTag); nerr == nil {
+		v = nv
+	}
 	_, err := json.Parse(b, v, c.decodeFlags)
 	return err
 }
@@ -72,38 +83,34 @@ func (c *jsonCodec) ReadHeader(conn io.Reader, m *codec.Message, t codec.Message
 	return nil
 }
 
-func (c *jsonCodec) ReadBody(conn io.Reader, b interface{}) error {
-	switch m := b.(type) {
-	case nil:
-		return nil
-	case *codec.Frame:
-		buf, err := ioutil.ReadAll(conn)
-		if err != nil {
-			return err
-		} else if len(buf) == 0 {
-			return nil
-		}
-		m.Data = buf
+func (c *jsonCodec) ReadBody(conn io.Reader, v interface{}) error {
+	if v == nil {
 		return nil
 	}
 
-	err := json.NewDecoder(conn).Decode(b)
-	if err == io.EOF {
+	buf, err := io.ReadAll(conn)
+	if err != nil {
+		return err
+	} else if len(buf) == 0 {
 		return nil
 	}
-	return err
+	return c.Unmarshal(buf, v)
 }
 
-func (c *jsonCodec) Write(conn io.Writer, m *codec.Message, b interface{}) error {
-	switch m := b.(type) {
-	case nil:
+func (c *jsonCodec) Write(conn io.Writer, m *codec.Message, v interface{}) error {
+	if v == nil {
 		return nil
-	case *codec.Frame:
-		_, err := conn.Write(m.Data)
-		return err
 	}
 
-	return json.NewEncoder(conn).Encode(b)
+	buf, err := c.Marshal(v)
+	if err != nil {
+		return err
+	} else if len(buf) == 0 {
+		return codec.ErrInvalidMessage
+	}
+
+	_, err = conn.Write(buf)
+	return err
 }
 
 func (c *jsonCodec) String() string {
