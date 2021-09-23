@@ -10,52 +10,71 @@ import (
 	newproto "google.golang.org/protobuf/proto"
 )
 
-type protoCodec struct{}
+type protoCodec struct {
+	opts codec.Options
+}
+
+var _ codec.Codec = &protoCodec{}
 
 const (
 	flattenTag = "flatten"
 )
 
-func (c *protoCodec) Marshal(v interface{}) ([]byte, error) {
-	switch m := v.(type) {
-	case nil:
+func (c *protoCodec) Marshal(v interface{}, opts ...codec.Option) ([]byte, error) {
+	if v == nil {
 		return nil, nil
-	case *codec.Frame:
-		return m.Data, nil
-	case newproto.Message, proto.Message:
-		if nv, nerr := rutil.StructFieldByTag(v, codec.DefaultTagName, flattenTag); nerr == nil {
-			if nm, ok := nv.(newproto.Message); ok {
-				m = nm
-			} else if nm, ok := nv.(proto.Message); ok {
-				m = nm
-			}
-		}
-		return proto.Marshal(m)
 	}
-	return nil, codec.ErrInvalidMessage
+
+	options := c.opts
+	for _, o := range opts {
+		o(&options)
+	}
+
+	if nv, nerr := rutil.StructFieldByTag(v, options.TagName, flattenTag); nerr == nil {
+		v = nv
+	}
+
+	if m, ok := v.(*codec.Frame); ok {
+		return m.Data, nil
+	}
+
+	switch v.(type) {
+	case proto.Message, newproto.Message:
+		break
+	default:
+		return nil, codec.ErrInvalidMessage
+	}
+
+	return proto.Marshal(v.(proto.Message))
 }
 
-func (c *protoCodec) Unmarshal(d []byte, v interface{}) error {
-	if d == nil {
+func (c *protoCodec) Unmarshal(d []byte, v interface{}, opts ...codec.Option) error {
+	if v == nil || len(d) == 0 {
 		return nil
 	}
-	switch m := v.(type) {
-	case nil:
-		return nil
-	case *codec.Frame:
+
+	options := c.opts
+	for _, o := range opts {
+		o(&options)
+	}
+
+	if nv, nerr := rutil.StructFieldByTag(v, options.TagName, flattenTag); nerr == nil {
+		v = nv
+	}
+
+	if m, ok := v.(*codec.Frame); ok {
 		m.Data = d
 		return nil
-	case newproto.Message, proto.Message:
-		if nv, nerr := rutil.StructFieldByTag(v, codec.DefaultTagName, flattenTag); nerr == nil {
-			if nm, ok := nv.(newproto.Message); ok {
-				m = nm
-			} else if nm, ok := nv.(proto.Message); ok {
-				m = nm
-			}
-		}
-		return proto.Unmarshal(d, m)
 	}
-	return codec.ErrInvalidMessage
+
+	switch v.(type) {
+	case proto.Message, newproto.Message:
+		break
+	default:
+		return codec.ErrInvalidMessage
+	}
+
+	return proto.Unmarshal(d, v.(proto.Message))
 }
 
 func (c *protoCodec) ReadHeader(conn io.Reader, m *codec.Message, t codec.MessageType) error {
@@ -95,6 +114,6 @@ func (c *protoCodec) String() string {
 	return "proto"
 }
 
-func NewCodec() codec.Codec {
-	return &protoCodec{}
+func NewCodec(opts ...codec.Option) *protoCodec {
+	return &protoCodec{opts: codec.NewOptions(opts...)}
 }

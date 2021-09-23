@@ -10,24 +10,29 @@ import (
 )
 
 var (
-	JsonMarshaler = &Marshaler{}
+	DefaultMarshalOptions = JsonMarshalOptions{
+		EscapeHTML:  true,
+		SortMapKeys: true,
+	}
 
-	JsonUnmarshaler = &Unmarshaler{
+	DefaultUnmarshalOptions = JsonUnmarshalOptions{
 		ZeroCopy: true,
 	}
 )
+
+var _ codec.Codec = &jsonCodec{}
 
 const (
 	flattenTag = "flatten"
 )
 
-type Marshaler struct {
+type JsonMarshalOptions struct {
 	EscapeHTML      bool
 	SortMapKeys     bool
 	TrustRawMessage bool
 }
 
-type Unmarshaler struct {
+type JsonUnmarshalOptions struct {
 	DisallowUnknownFields                bool
 	DontCopyNumber                       bool
 	DontCopyRawMessage                   bool
@@ -38,44 +43,121 @@ type Unmarshaler struct {
 }
 
 type jsonCodec struct {
+	opts        codec.Options
 	encodeFlags json.AppendFlags
 	decodeFlags json.ParseFlags
 }
 
-func (c *jsonCodec) Marshal(v interface{}) ([]byte, error) {
-	switch m := v.(type) {
-	case nil:
+func getMarshalFlags(o JsonMarshalOptions) json.AppendFlags {
+	var encodeFlags json.AppendFlags
+
+	if o.EscapeHTML {
+		encodeFlags |= json.EscapeHTML
+	}
+
+	if o.SortMapKeys {
+		encodeFlags |= json.SortMapKeys
+	}
+
+	if o.TrustRawMessage {
+		encodeFlags |= json.TrustRawMessage
+	}
+
+	return encodeFlags
+}
+
+func getUnmarshalFlags(o JsonUnmarshalOptions) json.ParseFlags {
+	var decodeFlags json.ParseFlags
+
+	if o.DisallowUnknownFields {
+		decodeFlags |= json.DisallowUnknownFields
+	}
+
+	if o.DontCopyNumber {
+		decodeFlags |= json.DontCopyNumber
+	}
+
+	if o.DontCopyRawMessage {
+		decodeFlags |= json.DontCopyRawMessage
+	}
+
+	if o.DontCopyString {
+		decodeFlags |= json.DontCopyString
+	}
+
+	if o.DontMatchCaseInsensitiveStructFields {
+		decodeFlags |= json.DontMatchCaseInsensitiveStructFields
+	}
+
+	if o.UseNumber {
+		decodeFlags |= json.UseNumber
+	}
+
+	if o.ZeroCopy {
+		decodeFlags |= json.ZeroCopy
+	}
+
+	return decodeFlags
+}
+
+func (c *jsonCodec) Marshal(v interface{}, opts ...codec.Option) ([]byte, error) {
+	if v == nil {
 		return nil, nil
-	case *codec.Frame:
+	}
+
+	options := c.opts
+	for _, o := range opts {
+		o(&options)
+	}
+
+	if nv, err := rutil.StructFieldByTag(v, options.TagName, flattenTag); err == nil {
+		v = nv
+	}
+
+	if m, ok := v.(*codec.Frame); ok {
 		return m.Data, nil
 	}
 
-	if nv, nerr := rutil.StructFieldByTag(v, codec.DefaultTagName, flattenTag); nerr == nil {
-		v = nv
+	marshalOptions := DefaultMarshalOptions
+	if options.Context != nil {
+		if f, ok := options.Context.Value(marshalOptionsKey{}).(JsonMarshalOptions); ok {
+			marshalOptions = f
+		}
 	}
 
 	var err error
 	var buf []byte
-	buf, err = json.Append(buf, v, c.encodeFlags)
+	buf, err = json.Append(buf, v, getMarshalFlags(marshalOptions))
 	return buf, err
 }
 
-func (c *jsonCodec) Unmarshal(b []byte, v interface{}) error {
-	if len(b) == 0 {
+func (c *jsonCodec) Unmarshal(b []byte, v interface{}, opts ...codec.Option) error {
+	if len(b) == 0 || v == nil {
 		return nil
 	}
-	switch m := v.(type) {
-	case nil:
-		return nil
-	case *codec.Frame:
+
+	options := c.opts
+	for _, o := range opts {
+		o(&options)
+	}
+
+	if nv, err := rutil.StructFieldByTag(v, options.TagName, flattenTag); err == nil {
+		v = nv
+	}
+
+	if m, ok := v.(*codec.Frame); ok {
 		m.Data = b
 		return nil
 	}
 
-	if nv, nerr := rutil.StructFieldByTag(v, codec.DefaultTagName, flattenTag); nerr == nil {
-		v = nv
+	unmarshalOptions := DefaultUnmarshalOptions
+	if options.Context != nil {
+		if f, ok := options.Context.Value(unmarshalOptionsKey{}).(JsonUnmarshalOptions); ok {
+			unmarshalOptions = f
+		}
 	}
-	_, err := json.Parse(b, v, c.decodeFlags)
+
+	_, err := json.Parse(b, v, getUnmarshalFlags(unmarshalOptions))
 	return err
 }
 
@@ -117,49 +199,6 @@ func (c *jsonCodec) String() string {
 	return "json"
 }
 
-func NewCodec() codec.Codec {
-	var encodeFlags json.AppendFlags
-	var decodeFlags json.ParseFlags
-
-	if JsonMarshaler.EscapeHTML {
-		encodeFlags |= json.EscapeHTML
-	}
-
-	if JsonMarshaler.SortMapKeys {
-		encodeFlags |= json.SortMapKeys
-	}
-
-	if JsonMarshaler.TrustRawMessage {
-		encodeFlags |= json.TrustRawMessage
-	}
-
-	if JsonUnmarshaler.DisallowUnknownFields {
-		decodeFlags |= json.DisallowUnknownFields
-	}
-
-	if JsonUnmarshaler.DontCopyNumber {
-		decodeFlags |= json.DontCopyNumber
-	}
-
-	if JsonUnmarshaler.DontCopyRawMessage {
-		decodeFlags |= json.DontCopyRawMessage
-	}
-
-	if JsonUnmarshaler.DontCopyString {
-		decodeFlags |= json.DontCopyString
-	}
-
-	if JsonUnmarshaler.DontMatchCaseInsensitiveStructFields {
-		decodeFlags |= json.DontMatchCaseInsensitiveStructFields
-	}
-
-	if JsonUnmarshaler.UseNumber {
-		decodeFlags |= json.UseNumber
-	}
-
-	if JsonUnmarshaler.ZeroCopy {
-		decodeFlags |= json.ZeroCopy
-	}
-
-	return &jsonCodec{encodeFlags: encodeFlags, decodeFlags: decodeFlags}
+func NewCodec(opts ...codec.Option) *jsonCodec {
+	return &jsonCodec{opts: codec.NewOptions(opts...)}
 }
