@@ -7,10 +7,10 @@ github.com/imdario/mergo v0.3.12/go.mod h1:jmQim1M+e3UYxmgPu/WyfjB3N3VflVyUjjjwH
 github.com/klauspost/cpuid/v2 v2.0.6 h1:dQ5ueTiftKxp0gyjKSx5+8BtPWkyQbd95m8Gys/RarI=
 github.com/klauspost/cpuid/v2 v2.0.6/go.mod h1:FInQzS24/EEf25PyTYn52gqo7WaD8xa0213Md/qVLRg=
 github.com/patrickmn/go-cache v2.1.0+incompatible/go.mod h1:3Qf8kWWT7OJRJbdiICTKqZju1ZixQ/KpMGzzAfe6+WQ=
-github.com/segmentio/asm v1.0.1 h1:g9VK62hXylgXI4yJV+dLTu/1j7kTxG9bkUSYBxL9dpg=
-github.com/segmentio/asm v1.0.1/go.mod h1:4EUJGaKsB8ImLUwOGORVsNd9vTRDeh44JGsY4aKp5I4=
-github.com/segmentio/encoding v0.2.21 h1:hlRQz3Pv+/mBj+jqr46TVqqv6AuTwvP5aAxQ0Usd4gY=
-github.com/segmentio/encoding v0.2.21/go.mod h1:kF1db1oBuYxMvLR3RXrZJchRdBKrS+1J/hL63p5hekI=
+github.com/segmentio/asm v1.1.0 h1:fkVr8k5J4sKoFjTGVD6r1yKvDKqmvrEh3K7iyVxgBs8=
+github.com/segmentio/asm v1.1.0/go.mod h1:4EUJGaKsB8ImLUwOGORVsNd9vTRDeh44JGsY4aKp5I4=
+github.com/segmentio/encoding v0.2.22 h1:rBIrvMa1AnQ/qe1QFAaqvsM5Ew8l0vSv+CIpo5F4Q1E=
+github.com/segmentio/encoding v0.2.22/go.mod h1:waft2p6XI4z2pk07M0YzZV4wEiqaRvsBSyWNHxVx4gU=
 github.com/silas/dag v0.0.0-20210121180416-41cf55125c34/go.mod h1:7RTUFBdIRC9nZ7/3RyRNH1bdqIShrDejd1YbLwgPS+I=
 github.com/unistack-org/micro-proto v0.0.9 h1:KrWLS4FUX7UAWNAilQf70uad6ZPf/0EudeddCXllRVc=
 github.com/unistack-org/micro-proto v0.0.9/go.mod h1:Cckwmzd89gvS7ThxzZp9kQR/EOdksFQcsTAtDDyKwrg=
