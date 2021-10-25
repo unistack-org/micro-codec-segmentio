@@ -5,8 +5,8 @@ import (
 	"io"
 
 	"github.com/segmentio/encoding/json"
-	"github.com/unistack-org/micro/v3/codec"
-	rutil "github.com/unistack-org/micro/v3/util/reflect"
+	"go.unistack.org/micro/v3/codec"
+	rutil "go.unistack.org/micro/v3/util/reflect"
 )
 
 var (
