@@ -1,5 +1,5 @@
 // Package json provides a json codec
-package json
+package json // import "go.unistack.org/micro-codec-segmentio/v3/json"
 
 import (
 	"io"

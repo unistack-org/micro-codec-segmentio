@@ -1,5 +1,5 @@
 // Package proto provides a proto codec
-package proto
+package proto // import "go.unistack.org/micro-codec-segmentio/v3/proto"
 
 import (
 	"io"
