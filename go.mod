@@ -4,6 +4,6 @@ go 1.16
 
 require (
 	github.com/segmentio/encoding v0.3.5
-	go.unistack.org/micro/v3 v3.9.7
+	go.unistack.org/micro/v3 v3.9.8
 	google.golang.org/protobuf v1.28.0
 )
