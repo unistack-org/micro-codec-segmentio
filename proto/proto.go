@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"github.com/segmentio/encoding/proto"
+	pb "go.unistack.org/micro-proto/v3/codec"
 	"go.unistack.org/micro/v3/codec"
 	rutil "go.unistack.org/micro/v3/util/reflect"
 	newproto "google.golang.org/protobuf/proto"
@@ -34,7 +35,10 @@ func (c *protoCodec) Marshal(v interface{}, opts ...codec.Option) ([]byte, error
 		v = nv
 	}
 
-	if m, ok := v.(*codec.Frame); ok {
+	switch m := v.(type) {
+	case *codec.Frame:
+		return m.Data, nil
+	case *pb.Frame:
 		return m.Data, nil
 	}
 
@@ -62,7 +66,11 @@ func (c *protoCodec) Unmarshal(d []byte, v interface{}, opts ...codec.Option) er
 		v = nv
 	}
 
-	if m, ok := v.(*codec.Frame); ok {
+	switch m := v.(type) {
+	case *codec.Frame:
+		m.Data = d
+		return nil
+	case *pb.Frame:
 		m.Data = d
 		return nil
 	}
