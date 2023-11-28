@@ -3,7 +3,7 @@ module go.unistack.org/micro-codec-segmentio/v3
 go 1.19
 
 require (
-	github.com/segmentio/encoding v0.3.6
+	github.com/segmentio/encoding v0.3.7
 	go.unistack.org/micro-proto/v3 v3.3.1
 	go.unistack.org/micro/v3 v3.10.32
 	google.golang.org/protobuf v1.31.0
