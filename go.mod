@@ -6,7 +6,7 @@ require (
 	github.com/segmentio/encoding v0.3.6
 	go.unistack.org/micro-proto/v3 v3.4.1
 	go.unistack.org/micro/v3 v3.10.42
-	google.golang.org/protobuf v1.31.0
+	google.golang.org/protobuf v1.33.0
 )
 
 require (
