@@ -258,3 +258,7 @@ func (c *jsonCodecV2) String() string {
 func NewCodec(opts ...codec.Option) *jsonCodec {
 	return &jsonCodec{opts: codec.NewOptions(opts...)}
 }
+
+func NewCodecV2(opts ...codec.Option) *jsonCodecV2 {
+	return &jsonCodecV2{opts: codec.NewOptions(opts...)}
+}
