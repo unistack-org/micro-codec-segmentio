@@ -211,7 +211,7 @@ func (c *jsonCodecV2) Marshal(b []byte, v interface{}, opts ...codec.Option) ([]
 	}
 
 	var err error
-	b, err = json.Append(b, v, getMarshalFlags(marshalOptions))
+	b, err = json.Append(b[:0], v, getMarshalFlags(marshalOptions))
 	return b, err
 }
 
