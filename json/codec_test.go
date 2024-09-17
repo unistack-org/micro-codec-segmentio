@@ -28,7 +28,7 @@ func TestFrameFlatten(t *testing.T) {
 		Name: &codec.Frame{Data: []byte("test")},
 	}
 
-	buf, err := NewCodec().Marshal(s)
+	buf, err := NewCodec(codec.Flatten(true)).Marshal(s)
 	if err != nil {
 		t.Fatal(err)
 	}

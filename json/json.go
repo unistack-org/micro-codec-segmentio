@@ -20,8 +20,8 @@ var (
 )
 
 var (
-	_ codec.Codec   = (*jsonCodec)()
-	_ codec.CodecV2 = (*jsonCodecV2)()
+	_ codec.Codec   = (*jsonCodec)(nil)
+	_ codec.CodecV2 = (*jsonCodecV2)(nil)
 )
 
 type JsonMarshalOptions struct {
