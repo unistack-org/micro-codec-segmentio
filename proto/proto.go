@@ -2,8 +2,6 @@
 package proto // import "go.unistack.org/micro-codec-segmentio/v3/proto"
 
 import (
-	"io"
-
 	"github.com/segmentio/encoding/proto"
 	pb "go.unistack.org/micro-proto/v3/codec"
 	"go.unistack.org/micro/v3/codec"
@@ -17,10 +15,6 @@ type protoCodec struct {
 
 var _ codec.Codec = &protoCodec{}
 
-const (
-	flattenTag = "flatten"
-)
-
 func (c *protoCodec) Marshal(v interface{}, opts ...codec.Option) ([]byte, error) {
 	if v == nil {
 		return nil, nil
@@ -31,8 +25,10 @@ func (c *protoCodec) Marshal(v interface{}, opts ...codec.Option) ([]byte, error
 		o(&options)
 	}
 
-	if nv, nerr := rutil.StructFieldByTag(v, options.TagName, flattenTag); nerr == nil {
-		v = nv
+	if options.Flatten {
+		if nv, nerr := rutil.StructFieldByTag(v, options.TagName, "flatten"); nerr == nil {
+			v = nv
+		}
 	}
 
 	switch m := v.(type) {
@@ -47,9 +43,9 @@ func (c *protoCodec) Marshal(v interface{}, opts ...codec.Option) ([]byte, error
 		return proto.Marshal(m)
 	case newproto.Message:
 		return proto.Marshal(m)
+	default:
+		return nil, codec.ErrInvalidMessage
 	}
-
-	return nil, codec.ErrInvalidMessage
 }
 
 func (c *protoCodec) Unmarshal(d []byte, v interface{}, opts ...codec.Option) error {
@@ -62,8 +58,10 @@ func (c *protoCodec) Unmarshal(d []byte, v interface{}, opts ...codec.Option) er
 		o(&options)
 	}
 
-	if nv, nerr := rutil.StructFieldByTag(v, options.TagName, flattenTag); nerr == nil {
-		v = nv
+	if options.Flatten {
+		if nv, nerr := rutil.StructFieldByTag(v, options.TagName, "flatten"); nerr == nil {
+			v = nv
+		}
 	}
 
 	switch m := v.(type) {
@@ -80,43 +78,9 @@ func (c *protoCodec) Unmarshal(d []byte, v interface{}, opts ...codec.Option) er
 		return proto.Unmarshal(d, m)
 	case newproto.Message:
 		return proto.Unmarshal(d, m)
-
-	}
-
-	return codec.ErrInvalidMessage
-}
-
-func (c *protoCodec) ReadHeader(conn io.Reader, m *codec.Message, t codec.MessageType) error {
-	return nil
-}
-
-func (c *protoCodec) ReadBody(conn io.Reader, v interface{}) error {
-	if v == nil {
-		return nil
-	}
-	buf, err := io.ReadAll(conn)
-	if err != nil {
-		return err
-	} else if len(buf) == 0 {
-		return nil
-	}
-	return c.Unmarshal(buf, v)
-}
-
-func (c *protoCodec) Write(conn io.Writer, m *codec.Message, v interface{}) error {
-	if v == nil {
-		return nil
-	}
-
-	buf, err := c.Marshal(v)
-	if err != nil {
-		return err
-	} else if len(buf) == 0 {
+	default:
 		return codec.ErrInvalidMessage
 	}
-
-	_, err = conn.Write(buf)
-	return err
 }
 
 func (c *protoCodec) String() string {

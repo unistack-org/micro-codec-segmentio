@@ -36,15 +36,3 @@ func TestFrameFlatten(t *testing.T) {
 		t.Fatalf("bytes not equal %s != %s", buf, `test`)
 	}
 }
-
-func TestReadBody(t *testing.T) {
-	s := &struct {
-		Name string
-	}{}
-	c := NewCodec()
-	b := bytes.NewReader(nil)
-	err := c.ReadBody(b, s)
-	if err != nil {
-		t.Fatal(err)
-	}
-}
