@@ -1,38 +1,9 @@
 run:
+  concurrency: 8
   deadline: 5m
+  issues-exit-code: 1
+  tests: true
   modules-download-mode: readonly
   skip-files:
     - ".*\\.pb\\.go$"
     - ".*\\.pb\\.micro\\.go$"
-linters:
-  disable-all: false
-  enable-all: false
-  enable:
-    - megacheck
-    - staticcheck
-    - deadcode
-    - varcheck
-    - gosimple
-    - unused
-    - prealloc
-    - scopelint
-    - gocritic
-    - goimports
-    - unconvert
-    - govet
-    - nakedret
-    - structcheck
-    - gosec
-  disable:
-    - maligned
-    - interfacer
-    - typecheck
-    - dupl
-output:
-  format: colored-line-number
-  # print lines of code with issue, default is true
-  print-issued-lines: true
-  # print linter name in the end of issue text, default is true
-  print-linter-name: true
-  # make issues output unique by line, default is true
-  uniq-by-line: true
