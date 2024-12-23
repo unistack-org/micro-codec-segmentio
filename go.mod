@@ -1,16 +1,18 @@
 module go.unistack.org/micro-codec-segmentio/v3
 
-go 1.19
+go 1.21
+
+toolchain go1.23.4
 
 require (
-	github.com/segmentio/encoding v0.4.0
+	github.com/segmentio/encoding v0.4.1
 	go.unistack.org/micro-proto/v3 v3.4.1
 	go.unistack.org/micro/v3 v3.10.88
-	google.golang.org/protobuf v1.34.2
+	google.golang.org/protobuf v1.35.2
 )
 
 require (
-	github.com/google/go-cmp v0.5.7 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
-	golang.org/x/sys v0.25.0 // indirect
+	golang.org/x/sys v0.28.0 // indirect
 )
