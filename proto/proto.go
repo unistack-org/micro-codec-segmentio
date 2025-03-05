@@ -1,11 +1,11 @@
 // Package proto provides a proto codec
-package proto // import "go.unistack.org/micro-codec-segmentio/v3/proto"
+package proto
 
 import (
 	"github.com/segmentio/encoding/proto"
-	pb "go.unistack.org/micro-proto/v3/codec"
-	"go.unistack.org/micro/v3/codec"
-	rutil "go.unistack.org/micro/v3/util/reflect"
+	pb "go.unistack.org/micro-proto/v4/codec"
+	"go.unistack.org/micro/v4/codec"
+	rutil "go.unistack.org/micro/v4/util/reflect"
 	newproto "google.golang.org/protobuf/proto"
 )
 
