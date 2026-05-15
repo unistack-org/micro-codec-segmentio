@@ -3,9 +3,9 @@ package proto
 
 import (
 	"github.com/segmentio/encoding/proto"
-	pb "go.unistack.org/micro-proto/v4/codec"
-	"go.unistack.org/micro/v4/codec"
-	rutil "go.unistack.org/micro/v4/util/reflect"
+	pb "go.unistack.org/micro-proto/v5/codec"
+	"go.unistack.org/micro/v5/codec"
+	rutil "go.unistack.org/micro/v5/util/reflect"
 	newproto "google.golang.org/protobuf/proto"
 )
 

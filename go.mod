@@ -1,4 +1,4 @@
-module go.unistack.org/micro-codec-segmentio/v4
+module go.unistack.org/micro-codec-segmentio/v5
 
 go 1.23.0
 
@@ -6,8 +6,8 @@ toolchain go1.24.1
 
 require (
 	github.com/segmentio/encoding v0.4.1
-	go.unistack.org/micro-proto/v4 v4.1.0
-	go.unistack.org/micro/v4 v4.1.2
+	go.unistack.org/micro-proto/v5 v4.1.0
+	go.unistack.org/micro/v5 v4.1.2
 	google.golang.org/protobuf v1.36.5
 )
 
